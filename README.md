@@ -7,23 +7,33 @@ This project uses infer.py to generate videos from text prompts or images using 
 - PyTorch
 - Other dependencies listed in your environment (see imports in infer.py)
 
-## Usage
+## Quickstart
 
-
-Image + Prompt:
-```bash
-python infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --mode full --height 1088 --width 1920 --num_frames 81 --out_dir output/ori --image_path ./test.jpg --prompt "your prompt"
+1. Refer to [DiffSynth-Studio/examples/wanvideo](https://github.com/modelscope/DiffSynth-Studio/tree/main/examples/wanvideo) for environment preparation.
+``` sh
+pip install diffsynth==1.1.7
+```
+2. Download [Wan2.1-T2V-1.3B](https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B) model using huggingface-cli:
+``` sh
+pip install "huggingface_hub[cli]"
+huggingface-cli download --repo-type model Wan-AI/Wan2.1-T2V-1.3B --local-dir ultrawan_weights/Wan2.1-T2V-1.3B --resume-download
+```
+3. Download [UltraWan-1K/4K](https://huggingface.co/APRIL-AIGC/UltraWan) models using huggingface-cli:
+``` sh
+huggingface-cli download --repo-type model APRIL-AIGC/UltraWan --local-dir ultrawan_weights/UltraWan --resume-download
+```
+4. Generate native 1K/4K videos.
+``` sh
+==> one GPU
+LoRA_1k: CUDA_VISIBLE_DEVICES=0 python infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --model_path ultrawan_weights/UltraWan/ultrawan-1k.ckpt --mode lora --lora_alpha 0.25 --usp 0 --height 1088 --width 1920 --num_frames 81 --out_dir output/ultrawan-1k --image_path ./test.jpg --prompt "your prompt"
+LoRA_4k: CUDA_VISIBLE_DEVICES=0 python infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --model_path ultrawan_weights/UltraWan/ultrawan-4k.ckpt --mode lora --lora_alpha 0.5 --usp 0 --height 2160 --width 3840 --num_frames 33 --out_dir output/ultrawan-4k --image_path ./test.jpg --prompt "your prompt"
+```
+``` sh
+==> usp with 6 GPUs
+LoRA_1k: CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 torchrun --standalone --nproc_per_node=6 infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --model_path ultrawan_weights/UltraWan/ultrawan-1k.ckpt --mode lora --lora_alpha 0.25 --usp 1 --height 1088 --width 1920 --num_frames 81 --out_dir output/ultrawan-1k --image_path ./test.jpg --prompt "your prompt"
+LoRA_4k: CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 torchrun --standalone --nproc_per_node=6 infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --model_path ultrawan_weights/UltraWan/ultrawan-4k.ckpt --mode lora --lora_alpha 0.5 --usp 1 --height 2160 --width 3840 --num_frames 33 --out_dir output/ultrawan-4k --image_path ./test.jpg --prompt "your prompt"
 ```
 
-Image only:
-```bash
-python infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --mode full --height 1088 --width 1920 --num_frames 81 --out_dir output/ori --image_path ./test.jpg
-```
-
-Prompt only:
-```bash
-python infer.py --model_dir ultrawan_weights/Wan2.1-T2V-1.3B --mode full --height 1088 --width 1920 --num_frames 81 --out_dir output/ori --prompt "your prompt"
-```
 
 ## Arguments
 - `--model_dir`: Path to model weights directory (default: ultrawan_weights/Wan2.1-T2V-1.3B)
